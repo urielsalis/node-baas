@@ -108,6 +108,7 @@ function BaaSServer (options) {
 
   if (process.env.REPORT_QUEUE_LENGTH) {
     this.cloudWatch = new AWS.CloudWatch();
+    this._intervalQueued = 0;
     setInterval(this._reportQueueLength.bind(this), 1000);
   }
 }
@@ -126,13 +127,16 @@ BaaSServer.prototype._reportQueueLength = function () {
     });
   }
 
+  const intervalQueued = this._intervalQueued;
+  this._intervalQueued = 0;
+
   this.cloudWatch.putMetricData({
     MetricData: [
       {
         MetricName: 'QueuedRequests',
         Unit:       'Count',
         Timestamp:  new Date(),
-        Value:      this._queue.length,
+        Value:      intervalQueued,
         Dimensions: dimensions
       }
     ],
@@ -222,6 +226,7 @@ BaaSServer.prototype._handler = function (socket) {
       }, `incoming ${operation}`);
 
       if (!this._workers.length){
+        this._intervalQueued++;
         // no available workers, queue and wait
         this._queue.push({request, done});
         return callback();

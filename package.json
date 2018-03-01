@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "async": "^2.6.0",
-    "auth0-instrumentation": "auth0/auth0-instrumentation#v1.2.1",
+    "auth0-instrumentation": "github:auth0/auth0-instrumentation#v2.11.4",
     "aws-sdk": "^2.188.0",
     "bcrypt": "^1.0.3",
     "bunyan": "^1.8.12",
@@ -40,7 +40,7 @@
     "reconnect-tls": "jfromaniello/reconnect-tls#hangup-fix",
     "server-destroy": "^1.0.1",
     "through2": "~2.0.1",
-    "v8-profiler": "~5.6.5"
+    "v8-profiler-node8": "^5.7.7"
   },
   "devDependencies": {
     "chai": "^4.1.2",

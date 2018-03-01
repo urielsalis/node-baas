@@ -39,8 +39,7 @@
     "reconnect-net": "^1.1.1",
     "reconnect-tls": "jfromaniello/reconnect-tls#hangup-fix",
     "server-destroy": "^1.0.1",
-    "through2": "~2.0.1",
-    "v8-profiler-node8": "^5.7.7"
+    "through2": "~2.0.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",

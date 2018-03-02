@@ -22,16 +22,13 @@ client.once('ready', function () {
           console.error(err.message);
           return process.exit(1);
         }
-        console.log('The password hash is ' + result.hash);
+        console.log('The password hash is ' + result);
         return process.exit(0);
       });
     });
   } else {
     read({ prompt: 'Enter the password to compare: ', silent: true }, function(er, password) {
-      client.compare({
-        password: password,
-        hash: program.hash
-      }, function (err, result) {
+      client.compare(password, program.hash, function (err, result) {
         if (err) {
           console.error(err.message);
           return process.exit(1);

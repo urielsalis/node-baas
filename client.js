@@ -86,8 +86,8 @@ BaaSClient.prototype.connect = function (done) {
     client.emit('ready');
   }).once('connect', function () {
     client.emit('connect');
-  }).on('close', function (has_error) {
-    client.emit('close', has_error);
+  }).on('close', function (err) {
+    client.emit('close', err);
   }).on('error', function (err) {
     if (err === 'DEPTH_ZERO_SELF_SIGNED_CERT' && options.rejectUnauthorized === false) {
       return;
@@ -164,7 +164,7 @@ BaaSClient.prototype._sendRequest = function (params, callback) {
 
   this.stream.write(request.encodeDelimited().toBuffer());
 
-  this.once('response_' + request.id, response => {
+  this.once('response_' + request.id, (response) => {
     this._pendingRequests--;
     if (this._pendingRequests === 0) {
       this.emit('drain');

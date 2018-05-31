@@ -1,7 +1,7 @@
 {
   "name": "baas",
   "version": "5.15.0",
-  "description": "Daemon for rate limiting using tocket buckets.",
+  "description": "Bcrypt as a service",
   "main": "index.js",
   "repository": {
     "type": "git",

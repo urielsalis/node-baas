@@ -167,14 +167,14 @@ BaaSServer.prototype._handler = function (socket) {
     }), 'connection error');
   }).on('close', () => {
     this._metrics.increment('connection.closed');
-    log.debug(sockets_details, 'connection closed');
+    log.info(sockets_details, 'connection closed');
   });
 
   if (this._config.socketTimeout) {
     socket.setTimeout(this._config.socketTimeout);
     socket.once('timeout', () => {
       log.info(sockets_details, 'idle connection closed');
-      socket.end();
+      return socket.end();
     });
   }
 
@@ -182,8 +182,8 @@ BaaSServer.prototype._handler = function (socket) {
 
   const decoder = RequestDecoder();
 
-  decoder.on('error',  () => {
-    log.info(sockets_details, 'unknown message format');
+  decoder.on('error',  (err) => {
+    log.info(_.extend(sockets_details, err), 'unknown message format');
     return socket.end();
   });
 
@@ -194,21 +194,23 @@ BaaSServer.prototype._handler = function (socket) {
   socket.pipe(decoder)
     .pipe(through2.obj((request, encoding, callback) => {
       const operation = request.operation === 0 ? 'compare' : 'hash';
-      const start = new Date();
+      const start = Date.now();
 
       const done = (worker_id, enqueued) => {
+        const took = Date.now() - start;
+
         return (err, response) => {
           log.info({
             request:    request.id,
             connection: socket._connection_id,
-            took:       new Date() - start,
+            took:       took,
             worker:     worker_id,
             operation:  operation,
             enqueued:   enqueued,
             log_type:   'response'
           }, `${operation} completed`);
 
-          this._metrics.histogram(`requests.processed.${operation}.time`, (new Date() - start));
+          this._metrics.histogram(`requests.processed.${operation}.time`, took);
           this._metrics.increment(`requests.processed.${operation}`);
 
           responseStream.write(new Response(response));

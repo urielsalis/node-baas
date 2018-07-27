@@ -1,16 +1,11 @@
 FROM node:8.11.2
 
-RUN apt-get update && apt-get install apt-transport-https && \
-  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-  apt-get update && apt-get install yarn
-
 WORKDIR /app
 
 EXPOSE 9485
 
-ADD package.json yarn.lock /app/
-RUN yarn
+ADD package.json /app/
+RUN npm i
 
 # Bundle app source
 ADD . /app

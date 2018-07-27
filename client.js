@@ -62,7 +62,7 @@ function BaaSClient (options, done) {
   this._sendRequestSafe = disyuntor(this._sendRequest.bind(this), _.extend({
     name: 'baas.client',
     timeout: options.requestTimeout,
-    onTrip: (err, failures, currentCooldown) => {
+    onTrip: (err) => {
       this.emit('breaker_error', err);
     }
   }, options.breaker || {} ));
@@ -154,10 +154,10 @@ BaaSClient.prototype._sendRequest = function (params, callback) {
   try {
     request = new RequestMessage(_.extend({
       'id': randomstring.generate(7)
-    }, params))
+    }, params));
   } catch (err) {
     return callback(err);
-  };
+  }
 
   this._requestCount++;
   this._pendingRequests++;

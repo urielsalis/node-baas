@@ -6,7 +6,7 @@ const util           = require('util');
 const bunyan         = require('bunyan');
 const _              = require('lodash');
 const net            = require('net');
-const Deque          = require("double-ended-queue");
+const Deque          = require('double-ended-queue');
 
 const RequestDecoder = require('./messages/decoders').RequestDecoder;
 const randomstring   = require('randomstring');
@@ -148,7 +148,7 @@ BaaSServer.prototype._reportQueueLength = function () {
   });
 };
 
-BaaSServer.prototype._handler = function (socket) {
+BaaSServer.prototype._handler = function(socket) {
   this._metrics.increment('connection.incoming');
 
   const sockets_details = _.pick(socket, ['remoteAddress', 'remotePort']);
@@ -178,7 +178,7 @@ BaaSServer.prototype._handler = function (socket) {
     });
   }
 
-  log.debug(sockets_details, 'connection accepted');
+  log.info(sockets_details, 'connection accepted');
 
   const decoder = RequestDecoder();
 
@@ -217,7 +217,7 @@ BaaSServer.prototype._handler = function (socket) {
         };
       };
 
-      this._metrics.increment(`requests.incoming`);
+      this._metrics.increment('requests.incoming');
 
       log.info({
         request:    request.id,
@@ -276,7 +276,7 @@ BaaSServer.prototype.stop = function (done) {
 
   this._server.close(() => {
     clearTimeout(timeout);
-    log.debug(address, 'server closed');
+    log.info(address, 'server closed');
     this.emit('close');
     if (done) { done(); }
   });

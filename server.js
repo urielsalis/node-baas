@@ -6,7 +6,7 @@ const util           = require('util');
 const bunyan         = require('bunyan');
 const _              = require('lodash');
 const net            = require('net');
-const Deque          = require("double-ended-queue");
+const Deque          = require('double-ended-queue');
 
 const RequestDecoder = require('./messages/decoders').RequestDecoder;
 const randomstring   = require('randomstring');
@@ -116,7 +116,7 @@ function BaaSServer (options) {
 util.inherits(BaaSServer, EventEmitter);
 
 BaaSServer.prototype._reportQueueLength = function () {
-  this._metrics.gauge('requests.queued', this._queue.length);
+  this._metrics.gauge('requests.queued', this._intervalQueued);
 
   const dimensions = [];
 
@@ -148,7 +148,7 @@ BaaSServer.prototype._reportQueueLength = function () {
   });
 };
 
-BaaSServer.prototype._handler = function (socket) {
+BaaSServer.prototype._handler = function(socket) {
   this._metrics.increment('connection.incoming');
 
   const sockets_details = _.pick(socket, ['remoteAddress', 'remotePort']);
@@ -167,23 +167,23 @@ BaaSServer.prototype._handler = function (socket) {
     }), 'connection error');
   }).on('close', () => {
     this._metrics.increment('connection.closed');
-    log.debug(sockets_details, 'connection closed');
+    log.info(sockets_details, 'connection closed');
   });
 
   if (this._config.socketTimeout) {
     socket.setTimeout(this._config.socketTimeout);
     socket.once('timeout', () => {
       log.info(sockets_details, 'idle connection closed');
-      socket.end();
+      return socket.end();
     });
   }
 
-  log.debug(sockets_details, 'connection accepted');
+  log.info(sockets_details, 'connection accepted');
 
   const decoder = RequestDecoder();
 
-  decoder.on('error',  () => {
-    log.info(sockets_details, 'unknown message format');
+  decoder.on('error',  (err) => {
+    log.info(_.extend(sockets_details, err), 'unknown message format');
     return socket.end();
   });
 
@@ -194,28 +194,30 @@ BaaSServer.prototype._handler = function (socket) {
   socket.pipe(decoder)
     .pipe(through2.obj((request, encoding, callback) => {
       const operation = request.operation === 0 ? 'compare' : 'hash';
-      const start = new Date();
+      const start = Date.now();
 
       const done = (worker_id, enqueued) => {
+        const took = Date.now() - start;
+
         return (err, response) => {
           log.info({
             request:    request.id,
             connection: socket._connection_id,
-            took:       new Date() - start,
+            took:       took,
             worker:     worker_id,
             operation:  operation,
             enqueued:   enqueued,
             log_type:   'response'
           }, `${operation} completed`);
 
-          this._metrics.histogram(`requests.processed.${operation}.time`, (new Date() - start));
+          this._metrics.histogram(`requests.processed.${operation}.time`, took);
           this._metrics.increment(`requests.processed.${operation}`);
 
           responseStream.write(new Response(response));
         };
       };
 
-      this._metrics.increment(`requests.incoming`);
+      this._metrics.increment('requests.incoming');
 
       log.info({
         request:    request.id,
@@ -274,7 +276,7 @@ BaaSServer.prototype.stop = function (done) {
 
   this._server.close(() => {
     clearTimeout(timeout);
-    log.debug(address, 'server closed');
+    log.info(address, 'server closed');
     this.emit('close');
     if (done) { done(); }
   });

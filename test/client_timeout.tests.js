@@ -4,13 +4,13 @@ const freeport = require('freeport');
 const assert = require('chai').assert;
 const _ = require('lodash');
 
-describe.skip('client (timeout)', function () {
+describe('client (timeout)', function () {
   var server, client;
 
   before(function (done) {
     freeport(function (err, port) {
       if (err) { return done(err); }
-      server = new BaaSServer({ port, logLevel: 'error', socketTimeout: 200 });
+      server = new BaaSServer({ port, logLevel: 'error', socketTimeout: 500 });
 
       server.start(function (err, address) {
         if (err) return done(err);
@@ -39,5 +39,4 @@ describe.skip('client (timeout)', function () {
       }, 1050);
     });
   });
-
 });

@@ -62,7 +62,7 @@ function BaaSClient (options, done) {
   this._sendRequestSafe = disyuntor(this._sendRequest.bind(this), _.extend({
     name: 'baas.client',
     timeout: options.requestTimeout,
-    onTrip: (err, failures, currentCooldown) => {
+    onTrip: (err) => {
       this.emit('breaker_error', err);
     }
   }, options.breaker || {} ));
@@ -86,8 +86,8 @@ BaaSClient.prototype.connect = function (done) {
     client.emit('ready');
   }).once('connect', function () {
     client.emit('connect');
-  }).on('close', function (has_error) {
-    client.emit('close', has_error);
+  }).on('close', function (err) {
+    client.emit('close', err);
   }).on('error', function (err) {
     if (err === 'DEPTH_ZERO_SELF_SIGNED_CERT' && options.rejectUnauthorized === false) {
       return;
@@ -154,17 +154,17 @@ BaaSClient.prototype._sendRequest = function (params, callback) {
   try {
     request = new RequestMessage(_.extend({
       'id': randomstring.generate(7)
-    }, params))
+    }, params));
   } catch (err) {
     return callback(err);
-  };
+  }
 
   this._requestCount++;
   this._pendingRequests++;
 
   this.stream.write(request.encodeDelimited().toBuffer());
 
-  this.once('response_' + request.id, response => {
+  this.once('response_' + request.id, (response) => {
     this._pendingRequests--;
     if (this._pendingRequests === 0) {
       this.emit('drain');

@@ -197,9 +197,9 @@ BaaSServer.prototype._handler = function(socket) {
       const start = Date.now();
 
       const done = (worker_id, enqueued) => {
-        const took = Date.now() - start;
 
         return (err, response) => {
+          const took = Date.now() - start;
           log.info({
             request:    request.id,
             connection: socket._connection_id,

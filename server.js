@@ -210,6 +210,11 @@ BaaSServer.prototype._handler = function(socket) {
             log_type:   'response'
           }, `${operation} completed`);
 
+          this._metrics.observeBucketed(
+            `requests.processed.${operation}.latency`,
+            took,
+            [10, 25, 50, 80, 100, 150, 250, 500, 1000]);
+            
           this._metrics.histogram(`requests.processed.${operation}.time`, took);
           this._metrics.increment(`requests.processed.${operation}`);
 

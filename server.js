@@ -25,6 +25,7 @@ const defaults = {
   metrics: {
     gauge:     _.noop,
     increment: _.noop,
+    observeBucketed: _.noop,
     histogram: _.noop,
     flush:     _.noop
   },

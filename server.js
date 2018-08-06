@@ -25,6 +25,7 @@ const defaults = {
   metrics: {
     gauge:     _.noop,
     increment: _.noop,
+    observeBucketed: _.noop,
     histogram: _.noop,
     flush:     _.noop
   },
@@ -210,6 +211,11 @@ BaaSServer.prototype._handler = function(socket) {
             log_type:   'response'
           }, `${operation} completed`);
 
+          this._metrics.observeBucketed(
+            `requests.processed.${operation}.latency`,
+            took,
+            [50, 80, 100, 150, 250, 500]);
+            
           this._metrics.histogram(`requests.processed.${operation}.time`, took);
           this._metrics.increment(`requests.processed.${operation}`);
 

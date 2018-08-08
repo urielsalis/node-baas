@@ -152,17 +152,19 @@ BaaSClient.prototype._sendRequest = function (params, callback) {
 
   var request;
   try {
-    request = new RequestMessage(_.extend({
+    request = RequestMessage.create(_.extend({
       'id': randomstring.generate(7)
     }, params));
+    let err = RequestMessage.verify(request);
+    if (err) {
+      throw new Error(err);
+    }
   } catch (err) {
     return callback(err);
   }
 
   this._requestCount++;
   this._pendingRequests++;
-
-  this.stream.write(request.encodeDelimited().toBuffer());
 
   this.once('response_' + request.id, (response) => {
     this._pendingRequests--;
@@ -176,6 +178,8 @@ BaaSClient.prototype._sendRequest = function (params, callback) {
 
     callback(null, response);
   });
+
+  this.stream.write(RequestMessage.encodeDelimited(request).finish());
 };
 
 BaaSClient.prototype.disconnect = function () {

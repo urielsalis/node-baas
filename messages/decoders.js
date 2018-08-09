@@ -3,7 +3,7 @@ const through2 = require('through2');
 const protobuf = require('protobufjs');
 
 function decoder(Message) {
-    var buff;
+    let buff;
     return through2.obj(function(chunk, enc, callback) {
         var chunk = protobuf.util.Buffer.from(chunk);
         buff = buff ? protobuf.util.Buffer.concat([buff, chunk]) : chunk;

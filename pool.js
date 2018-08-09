@@ -98,7 +98,6 @@ BaaSPool.prototype._killClient = function (client) {
 
     self._getClient(function (err, client) {
       if (err) {
-        console.log(err);
         return callback(err);
       }
 

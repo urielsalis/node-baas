@@ -13,6 +13,7 @@ const randomstring   = require('randomstring');
 
 const ResponseWriter = require('./lib/pipeline/response_writer');
 const through2       = require('through2');
+const Request        = require('./messages').Request;
 const Response       = require('./messages').Response;
 const AWS            = require('aws-sdk');
 const enableDestroy  = require('server-destroy');
@@ -42,6 +43,7 @@ function fork_worker() {
   worker._pendingRequests = new Map();
 
   worker.on('message', function (response) {
+    var response = Response.create(response);
     const callback = worker._pendingRequests.get(response.request_id);
     worker._pendingRequests.delete(response.request_id);
     worker.emit('drain');
@@ -50,7 +52,7 @@ function fork_worker() {
 
   worker.sendRequest = function (message, callback) {
     worker._pendingRequests.set(message.id, callback);
-    worker.send(message);
+    worker.send(Request.toObject(message));
   };
 
   return worker;
@@ -198,7 +200,6 @@ BaaSServer.prototype._handler = function(socket) {
       const start = Date.now();
 
       const done = (worker_id, enqueued) => {
-
         return (err, response) => {
           const took = Date.now() - start;
           log.info({
@@ -219,7 +220,7 @@ BaaSServer.prototype._handler = function(socket) {
           this._metrics.histogram(`requests.processed.${operation}.time`, took);
           this._metrics.increment(`requests.processed.${operation}`);
 
-          responseStream.write(new Response(response));
+          responseStream.write(response);
         };
       };
 

@@ -1,6 +1,10 @@
-const ProtoBuf = require('protobufjs');
+const protobuf = require('protobufjs');
 const path = require('path');
 
-const builder = ProtoBuf.loadProtoFile(path.join(__dirname, '/../protocol/Index.proto'));
+const root = new protobuf.Root();
+root.loadSync(path.join(__dirname, '/../protocol/Index.proto'), {keepCase: true});
 
-module.exports = builder.build('baas');
+module.exports = {
+  Request: root.lookupType('baas.Request'),
+  Response: root.lookupType('baas.Response'),
+};

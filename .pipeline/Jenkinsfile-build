@@ -1,0 +1,33 @@
+pipeline {
+  agent any
+ 
+  tools {nodejs "node"}
+ 
+  stages {
+    stage('Get sources') {
+      steps {
+        git 'https://github.com/urielsalis/node-baas.git'
+        sh 'git clean -fdx'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'npm prune'
+        sh 'npm install'
+      }
+    }
+    
+    stage('Test') {
+      steps {
+        sh 'npm test'
+      }
+    }
+    
+    stage('Create build artifact') {
+      steps {
+        zip zipFile: 'bundle.zip', archive: true
+      }
+    }
+  }
+}

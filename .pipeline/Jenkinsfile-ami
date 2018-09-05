@@ -1,0 +1,19 @@
+pipeline {
+  agent any
+ 
+  tools {nodejs "node"}
+ 
+  stages {
+    stage('Packer build script') {
+        steps {
+           step([  $class: 'CopyArtifact',
+                  filter: 'bundle.zip',
+                  fingerprintArtifacts: true,
+                  projectName: 'node-baas'
+            ])
+            unzip zipFile: 'test.zip', dir: './archive_new'
+            sh 'packer build .pipeline/packer.json'
+        }
+    }
+  }
+}

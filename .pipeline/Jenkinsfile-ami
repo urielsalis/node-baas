@@ -11,8 +11,8 @@ pipeline {
                   fingerprintArtifacts: true,
                   projectName: 'node-baas'
             ])
-            unzip zipFile: 'test.zip', dir: './archive_new'
-            sh 'packer build .pipeline/packer.json'
+            unzip zipFile: 'bundle.zip', dir: './bundle'
+            sh 'packer build bundle/.pipeline/packer.json'
         }
     }
   }

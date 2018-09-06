@@ -6,7 +6,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        build job: 'nodejs-template', propagate: true, parameters: [[$class: 'StringParameterValue', name: 'REPO', value: 'https://github.com/urielsalis/node-baas'], [$class: 'StringParameterValue', name: 'NAME', value: '${env.JOB_NAME}-${env.BUILD_NUMBER}']]      }
+        build job: 'nodejs-template', propagate: true, parameters: [[$class: 'StringParameterValue', name: 'REPO', value: 'https://github.com/urielsalis/node-baas'], [$class: 'StringParameterValue', name: 'NAME', value: "${env.JOB_NAME}-${env.BUILD_NUMBER}"]]      }
     }
 
     stage('Create AMI') {
